@@ -4,3 +4,5 @@
 export function GetAccountBalance():Promise<number>;
 
 export function Greet(arg1:string):Promise<string>;
+
+export function StartMarketStream(arg1:string):Promise<string>;

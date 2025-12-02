@@ -9,3 +9,7 @@ export function GetAccountBalance() {
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
+
+export function StartMarketStream(arg1) {
+  return window['go']['main']['App']['StartMarketStream'](arg1);
+}
