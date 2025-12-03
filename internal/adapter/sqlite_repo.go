@@ -3,6 +3,7 @@ package adapter
 import (
 	"database/sql"
 	"fmt"
+	"time"
 	"trading-bot/internal/domain"
 
 	_ "modernc.org/sqlite"
@@ -64,6 +65,33 @@ func (r *SQLiteRepository) initDB() error {
 		return fmt.Errorf("failed to create signals table: %w", err)
 	}
 
+	// Create users table
+	createUsers := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email TEXT NOT NULL UNIQUE,
+		password TEXT NOT NULL,
+		created_at INTEGER NOT NULL
+	);`
+	if _, err := r.db.Exec(createUsers); err != nil {
+		return fmt.Errorf("failed to create users table: %w", err)
+	}
+
+	// Create settings table
+	createSettings := `
+	CREATE TABLE IF NOT EXISTS settings (
+		user_id INTEGER PRIMARY KEY,
+		alpaca_api_key TEXT,
+		alpaca_secret_key TEXT,
+		theme TEXT,
+		notifications_email INTEGER,
+		notifications_push INTEGER,
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);`
+	if _, err := r.db.Exec(createSettings); err != nil {
+		return fmt.Errorf("failed to create settings table: %w", err)
+	}
+
 	return nil
 }
 
@@ -94,6 +122,68 @@ func (r *SQLiteRepository) SaveTrade(trade *domain.Trade) error {
 		return fmt.Errorf("failed to save trade: %w", err)
 	}
 	return nil
+}
+
+// User & Settings Methods
+
+func (r *SQLiteRepository) CreateUser(email, password string) error {
+	query := `INSERT INTO users (email, password, created_at) VALUES (?, ?, ?)`
+	_, err := r.db.Exec(query, email, password, time.Now().Unix())
+	return err
+}
+
+func (r *SQLiteRepository) GetUserByEmail(email string) (*domain.User, error) {
+	query := `SELECT id, email, password, created_at FROM users WHERE email = ?`
+	row := r.db.QueryRow(query, email)
+	var u domain.User
+	var createdAt int64
+	if err := row.Scan(&u.ID, &u.Email, &u.Password, &createdAt); err != nil {
+		return nil, err
+	}
+	u.CreatedAt = time.Unix(createdAt, 0)
+	return &u, nil
+}
+
+func (r *SQLiteRepository) SaveSettings(s *domain.UserSettings) error {
+	query := `
+	INSERT INTO settings (user_id, alpaca_api_key, alpaca_secret_key, theme, notifications_email, notifications_push)
+	VALUES (?, ?, ?, ?, ?, ?)
+	ON CONFLICT(user_id) DO UPDATE SET
+		alpaca_api_key = excluded.alpaca_api_key,
+		alpaca_secret_key = excluded.alpaca_secret_key,
+		theme = excluded.theme,
+		notifications_email = excluded.notifications_email,
+		notifications_push = excluded.notifications_push
+	`
+	notifEmail := 0
+	if s.NotificationsEmail {
+		notifEmail = 1
+	}
+	notifPush := 0
+	if s.NotificationsPush {
+		notifPush = 1
+	}
+
+	_, err := r.db.Exec(query, s.UserID, s.AlpacaAPIKey, s.AlpacaSecretKey, s.Theme, notifEmail, notifPush)
+	return err
+}
+
+func (r *SQLiteRepository) GetSettings(userID int) (*domain.UserSettings, error) {
+	query := `SELECT alpaca_api_key, alpaca_secret_key, theme, notifications_email, notifications_push FROM settings WHERE user_id = ?`
+	row := r.db.QueryRow(query, userID)
+	var s domain.UserSettings
+	s.UserID = userID
+	var notifEmail, notifPush int
+	if err := row.Scan(&s.AlpacaAPIKey, &s.AlpacaSecretKey, &s.Theme, &notifEmail, &notifPush); err != nil {
+		if err == sql.ErrNoRows {
+			// Return empty settings if not found
+			return &s, nil
+		}
+		return nil, err
+	}
+	s.NotificationsEmail = notifEmail == 1
+	s.NotificationsPush = notifPush == 1
+	return &s, nil
 }
 
 // LogTick is a helper for Phase 2 verification to show we are streaming data.
