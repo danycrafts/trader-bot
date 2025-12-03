@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Box, Typography, Paper, TextField, Button, Switch, FormControlLabel } from '@mui/material';
 import { GetSettings, SaveSettings } from '../../wailsjs/go/main/App';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Settings() {
   const [apiKey, setApiKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
-  const [theme, setTheme] = useState('light');
   const [notificationsEmail, setNotificationsEmail] = useState(false);
   const [notificationsPush, setNotificationsPush] = useState(false);
+
+  const { mode, setThemeMode } = useTheme();
 
   useEffect(() => {
     // Mock user ID 1 for now
@@ -15,7 +17,10 @@ export default function Settings() {
         if(s) {
             setApiKey(s.alpaca_api_key || '');
             setSecretKey(s.alpaca_secret_key || '');
-            setTheme(s.theme || 'light');
+            // Theme is handled by context but we sync it here initially if needed
+            // But context already fetches it.
+            // However, we need to ensure local UI matches context.
+            // setMode handled by hook.
             setNotificationsEmail(s.notifications_email);
             setNotificationsPush(s.notifications_push);
         }
@@ -28,7 +33,7 @@ export default function Settings() {
             user_id: 1, // Mock
             alpaca_api_key: apiKey,
             alpaca_secret_key: secretKey,
-            theme: theme,
+            theme: mode, // Save current context mode
             notifications_email: notificationsEmail,
             notifications_push: notificationsPush
         });
@@ -38,6 +43,13 @@ export default function Settings() {
     }
   };
 
+  const handleThemeChange = (e: any) => {
+      const newMode = e.target.checked ? 'dark' : 'light';
+      setThemeMode(newMode);
+  };
+
+  // TODO: Unit Test: Verify settings form updates state correctly
+  // TODO: Unit Test: Verify handleSave calls SaveSettings with correct data
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Typography variant="h4" gutterBottom>Settings</Typography>
@@ -61,7 +73,7 @@ export default function Settings() {
 
         <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>Appearance</Typography>
         <FormControlLabel
-            control={<Switch checked={theme === 'dark'} onChange={(e:any) => setTheme(e.target.checked ? 'dark' : 'light')} />}
+            control={<Switch checked={mode === 'dark'} onChange={handleThemeChange} />}
             label="Dark Mode"
         />
 

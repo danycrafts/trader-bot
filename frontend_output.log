@@ -3,10 +3,12 @@
 > vite
 
 
-  VITE v3.2.11  ready in 570 ms
+  VITE v3.2.11  ready in 535 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-11:02:30 PM [vite] hmr update /wailsjs/go/main/App.js
-11:03:22 PM [vite] hmr update /src/app.tsx
-11:03:37 PM [vite] page reload dist/index.html
+7:21:27 AM [vite] hmr update /wailsjs/go/main/App.js
+7:25:42 AM [vite] hmr update /src/app.tsx
+7:26:00 AM [vite] hmr update /src/pages/Settings.tsx
+7:26:24 AM [vite] hmr update /src/pages/Login.tsx
+7:26:39 AM [vite] hmr update /src/pages/Market.tsx

@@ -68,6 +68,8 @@ export default function Market() {
       }
   }
 
+  // TODO: Unit Test: Verify searching stocks calls backend
+  // TODO: Unit Test: Verify buy/sell buttons call PlaceOrder
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Typography variant="h4" gutterBottom>Market</Typography>

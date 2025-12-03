@@ -22,6 +22,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     }
   };
 
+  // TODO: Unit Test: Verify login form submission calls backend
+  // TODO: Unit Test: Verify error handling on invalid credentials
   return (
     <Container component="main" maxWidth="xs">
       <Paper sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 3 }}>

@@ -59,6 +59,7 @@ func (a *App) Greet(name string) string {
 }
 
 // GetAccountBalance returns the current account equity
+// TODO: Unit Test: Verify balance retrieval
 func (a *App) GetAccountBalance() (float64, error) {
 	return a.broker.GetAccountBalance()
 }
@@ -75,6 +76,7 @@ func (a *App) StartMarketStream(symbol string) string {
 // --- Auth ---
 
 // Login authenticates a user
+// TODO: Unit Test: Verify valid and invalid login scenarios
 func (a *App) Login(email, password string) (*domain.User, error) {
 	u, err := a.repo.GetUserByEmail(email)
 	if err != nil {
@@ -87,6 +89,7 @@ func (a *App) Login(email, password string) (*domain.User, error) {
 }
 
 // Register registers a new user
+// TODO: Unit Test: Verify user registration and duplicate check
 func (a *App) Register(email, password string) error {
 	_, err := a.repo.GetUserByEmail(email)
 	if err == nil {
@@ -98,6 +101,7 @@ func (a *App) Register(email, password string) error {
 // --- Settings ---
 
 // SaveSettings saves user settings
+// TODO: Unit Test: Verify settings are saved correctly
 func (a *App) SaveSettings(settings domain.UserSettings) error {
 	return a.repo.SaveSettings(&settings)
 }
@@ -124,6 +128,7 @@ func (a *App) SearchStocks(query string) ([]string, error) {
 }
 
 // PlaceOrder places an order
+// TODO: Unit Test: Verify order placement logic
 func (a *App) PlaceOrder(symbol string, qty float64, side string) error {
 	// a.broker.PlaceOrder(...)
 	// For now, mock it and save to DB
